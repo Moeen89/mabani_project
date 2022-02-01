@@ -1,0 +1,7 @@
+# ninja log v5
+0	39	1643720760629635618	build.ninja	66c5fc1365d64152
+0	23	1643631184252183402	CMakeFiles/u.dir/file_functions.c.o	7dfc1f5f4e7ee0dd
+167	315	1643719038304118209	u	17b98f8b47579ae9
+1	29	1643718871914261987	CMakeFiles/u.dir/other_functions.c.o	633ae8ddacafde76
+1	167	1643719038160004637	CMakeFiles/u.dir/main.c.o	75c17d61189d6f11
+1	170	1643617322166066210	CMakeFiles/u.dir/TextureLoader.c.o	84cb67be2eba573a
