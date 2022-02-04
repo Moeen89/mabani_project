@@ -22,4 +22,6 @@ int custom_game_button(int x,int y);
 void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Texture** shape_t,SDL_Texture** barracks_t,TTF_Font* game_font);
 void troop_production(struct territory_struct* inp,struct map* game);
 int select_barracks(struct map* game_map,int x,int y);
+void set_troops(int players,struct territory_struct* inp,struct troops_struct* troops,int from,int to);
+void render_troops(int players,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer);
 #endif //U_OTHER_FUNCTIONS_H

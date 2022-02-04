@@ -36,10 +36,9 @@ struct map random_map(int player){
             random_map.first_tr_ptr[placed_territory].owner = 1 +j;
             random_map.first_tr_ptr[placed_territory].rotation = rand() %360;
             random_map.first_tr_ptr[placed_territory].type = rand() % territory_types;
-            random_map.first_tr_ptr[placed_territory].troops = 3 + (!is_two_territory_for_one)*7;
+            random_map.first_tr_ptr[placed_territory].troops = 3 + (random_map.players_t[j] ==1)*7;
         }
     }
-    printf("yaghi map\n");
     for(;placed_territory<random_map.total_territory;placed_territory++){
         is_conflict = 1;
         while (is_conflict){
@@ -59,5 +58,9 @@ struct map random_map(int player){
     random_map.production_rate[1] = 1;
     random_map.production_rate[2] = 1;
     random_map.production_rate[3] = 1;
+    random_map.troops_speed[0] = 2;
+    random_map.troops_speed[1] = 2;
+    random_map.troops_speed[2] = 2;
+    random_map.troops_speed[3] = 2;
     return random_map;
 }

@@ -124,7 +124,7 @@ build CMakeFiles/u.dir/map_generator.c.o: C_COMPILER__u_Debug /home/moein111/CLi
 
 build u: C_EXECUTABLE_LINKER__u_Debug CMakeFiles/u.dir/main.c.o CMakeFiles/u.dir/TextureLoader.c.o CMakeFiles/u.dir/other_functions.c.o CMakeFiles/u.dir/file_functions.c.o CMakeFiles/u.dir/game.c.o CMakeFiles/u.dir/map_generator.c.o | /usr/lib/x86_64-linux-gnu/libSDL2_image.so /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so /usr/lib/x86_64-linux-gnu/libSDL2main.a /usr/lib/x86_64-linux-gnu/libSDL2.so
   FLAGS = -g
-  LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libSDL2_image.so  /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so  /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so  /usr/lib/x86_64-linux-gnu/libSDL2main.a  /usr/lib/x86_64-linux-gnu/libSDL2.so  -lpthread
+  LINK_LIBRARIES = -lm  /usr/lib/x86_64-linux-gnu/libSDL2_image.so  /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so  /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so  /usr/lib/x86_64-linux-gnu/libSDL2main.a  /usr/lib/x86_64-linux-gnu/libSDL2.so  -lpthread
   OBJECT_DIR = CMakeFiles/u.dir
   POST_BUILD = :
   PRE_LINK = :

@@ -4,15 +4,16 @@
 
 #include "game.h"
 int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int is_undead,TTF_Font* game_font ){
-    printf("start\n");
     SDL_Texture* background = loadTexture(renderer,"images/shape/map.png");
     SDL_Texture** barracks = barracks_loader(renderer);// 0 :
     SDL_Texture** shapes = shape_loader(renderer);
     struct map* loaded_map = NULL;
     //if(map_checked==0){// generate map
-    printf("plsyers :%d\n",is_undead+is_orc+is_elf+1);
     struct map loaded_map_rnd = random_map(is_orc+is_elf+is_undead+1);
     loaded_map = &loaded_map_rnd;
+
+    struct troops_struct moving_troops[(is_orc+is_elf+is_undead+1)][200];
+    memset(moving_troops,0,sizeof(moving_troops));
 
 
 
@@ -38,6 +39,10 @@ int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int 
                     if(from_to[0]== from_to[1]){
                         from_to[0]=-1;
                         from_to[1]=-1;
+                    }else{
+                        set_troops(loaded_map->player_alive,&loaded_map->first_tr_ptr[from_to[0]],moving_troops,from_to[0],from_to[1]);
+                        from_to[0]=-1;
+                        from_to[1]=-1;
                     }
                 }
             }
@@ -56,6 +61,7 @@ int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int 
         for(int i=0;i<loaded_map->total_territory;i++) {
             render_territory(renderer, &(loaded_map->first_tr_ptr[i]), shapes, barracks,game_font);
         }
+        render_troops(loaded_map->player_alive,moving_troops,loaded_map,renderer);
         SDL_RenderPresent(renderer);
         SDL_Delay(20);
     }
