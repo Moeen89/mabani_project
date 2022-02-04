@@ -37,3 +37,52 @@ int custom_game_button(int x,int y){
     }
     return -1;
 }
+
+
+
+void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Texture** shape_t,SDL_Texture** barracks_t,TTF_Font* game_font){
+    SDL_Rect rect;
+    rect.x = inp->x_center-55;
+    rect.y = inp->y_center-55;
+    rect.w = 110;
+    rect.h = 110;
+    if(inp->owner!=0) {
+        SDL_RenderCopyEx(renderer, shape_t[(inp->owner-1) * 9 + inp->type], NULL, &rect, inp->rotation, NULL,SDL_FLIP_NONE);
+    }
+    rect.x += 15;
+    rect.y += 15;
+    rect.w = 80;
+    rect.h = 80;
+    SDL_RenderCopy(renderer, barracks_t[inp->owner], NULL, &rect);
+    char troops[5];
+    sprintf(troops,"%d",inp->troops);
+    SDL_Color green={0,255,100};
+    SDL_Texture* text = textLoader(troops,green,game_font,renderer);
+    rect.x +=20;
+    rect.y +=25;
+    rect.w = 40;
+    rect.h = 30;
+    SDL_RenderCopy(renderer,text,NULL,&rect);
+    SDL_DestroyTexture(text);
+
+}
+
+void troop_production(struct territory_struct* inp,struct map* game){
+    int max=25;
+    if(inp->owner==0){
+         max =12;
+    }
+    inp->troops += game->production_rate[inp->owner];
+    if(inp->troops>max){
+        inp->troops=max;
+    }
+}
+
+int select_barracks(struct map* game_map,int x,int y){
+    for(int i=0;i< game_map->total_territory;i++){
+        if(abs(x-game_map->first_tr_ptr[i].x_center)<45 && abs(y-game_map->first_tr_ptr[i].y_center)<45){
+            return i;
+        }
+    }
+    return -1;
+}

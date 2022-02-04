@@ -10,7 +10,6 @@
 #include "TextureLoader.h"
 #include "other_functions.h"
 #include "file_functions.h"
-#include "game.h"
 
 
 
@@ -166,11 +165,8 @@ int main() {
                         next_menu =0;
                         break;
                     case 1:
-                        if(map_checked == 0){
-                            //random map;
-                        }
-                        if(is_elf+is_undead+is_orc == player_in_map(map_checked)){
-                            //start game
+                        if(map_checked==0 || is_elf+is_undead+is_orc == player_in_map(map_checked)){
+                            game_start(renderer,map_checked,is_elf,is_orc,is_undead,game_font);
                         }
                         break;
                     case 5:
@@ -223,7 +219,9 @@ int main() {
 
     TTF_CloseFont( game_font );
     game_font = NULL;
-    SDL_FreeSurface( menu_background );
+    SDL_DestroyTexture(menu_background[0]);
+    SDL_DestroyTexture(menu_background[1]);
+    SDL_DestroyTexture(menu_background[2]);
     Mix_FreeChunk(click_effecct);
     Mix_FreeChunk(next_page_effect);
     Mix_FreeMusic( background_music);

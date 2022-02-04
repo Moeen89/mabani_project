@@ -7,5 +7,6 @@
 #include <stdlib.h>
 #include<time.h>
 #include <math.h>
-
+#include "game.h"
+struct map random_map(int player);
 #endif //U_MAP_GENERATOR_H

@@ -17,7 +17,20 @@
 #include "other_functions.h"
 #include "file_functions.h"
 #include "map_generator.h"
-struct map{
-
+struct territory_struct{
+    int x_center;   // 30 - 1250
+    int y_center;   //30 - 690
+    int type;       // 0 - 8
+    int rotation;   // 0-359
+    int owner;      // 0-4  0: free
+    int troops;     // 0 - 25
 };
+struct map{
+struct territory_struct* first_tr_ptr;
+int players_t[4];
+int player_alive;
+int total_territory;
+int production_rate[5];
+};
+int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int is_undead,TTF_Font* game_font );
 #endif //U_GAME_H
