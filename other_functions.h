@@ -20,8 +20,12 @@
 int menu_button(int x, int y,int current);
 int custom_game_button(int x,int y);
 void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Texture** shape_t,SDL_Texture** barracks_t,TTF_Font* game_font);
-void troop_production(struct territory_struct* inp,struct map* game);
+void troop_production(struct territory_struct* inp,struct map* game,int frame);
 int select_barracks(struct map* game_map,int x,int y);
-void set_troops(int players,struct territory_struct* inp,struct troops_struct* troops,int from,int to);
-void render_troops(int players,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer);
+void set_troops(struct territory_struct* inp,struct troops_struct* troops,int from,int to);
+void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int frame);
+void AI(struct map* game,struct troops_struct* troops);
+void random_potion(struct potion_struct* potions,struct map* game,int *total);
+void render_potion(struct potion_struct* potions,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int* total);
+void set_up_game(int is_elf,int is_orc,int is_undead,struct map* game);
 #endif //U_OTHER_FUNCTIONS_H

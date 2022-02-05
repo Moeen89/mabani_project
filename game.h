@@ -33,12 +33,21 @@ int player_alive;
 int total_territory;
 int production_rate[5];
 int troops_speed[4];
+int active_poition_type[4];
+int active_poition_time[4];
+
 };
 struct troops_struct{
     float x;
     float y;
     int from_t;
     int to_t;
+    int owner;
+};
+struct potion_struct{
+    int x;
+    int y;
+    int type;
 };
 int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int is_undead,TTF_Font* game_font );
 #endif //U_GAME_H
