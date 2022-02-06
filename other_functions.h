@@ -28,4 +28,6 @@ void AI(struct map* game,struct troops_struct* troops);
 void random_potion(struct potion_struct* potions,struct map* game,int *total);
 void render_potion(struct potion_struct* potions,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int* total);
 void set_up_game(int is_elf,int is_orc,int is_undead,struct map* game);
+int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* renderer,TTF_Font* font,int is_elf,int is_orc,int is_undead);
+void in_game_menu(SDL_Renderer * renderer,struct map* game,int * x,struct troops_struct* troops,struct potion_struct*p,int total_p);
 #endif //U_OTHER_FUNCTIONS_H

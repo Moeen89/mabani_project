@@ -1,5 +1,16 @@
 
 #include "other_functions.h"
+struct scoreboard_data{
+    int point;
+    int type;
+};
+int compare(const struct scoreboard_data *p, const struct scoreboard_data *q){
+    if(q->point> p->point){
+        return 1;
+    }
+    return 0;
+}
+
 int menu_button(int x, int y,int current){
     if(x <1100 && x>800){
         if(y<130 && y>80){
@@ -34,6 +45,8 @@ int custom_game_button(int x,int y){
         return 7;//map2
     }else if(x<720 && x>320 && y>90&& y<110){
         return 8;//map3
+    }else if(x<720 && x>320 && y>110&& y<130){
+        return 9;//saved map
     }
     return -1;
 }
@@ -148,6 +161,7 @@ void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* r
                             if(troops[ff].from_t-1 ==troops[i].to_t-1){
                                 troops[ff].from_t  =0;
                                 troops[ff].to_t  =0;
+                                troops[ff].owner  =0;
                                 break;
                             }
                         }
@@ -157,17 +171,21 @@ void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* r
                     if( game->first_tr_ptr[troops[i].to_t-1].troops<0){
                         game->first_tr_ptr[troops[i].to_t-1].owner = troops[i].owner;
                         game->first_tr_ptr[troops[i].to_t-1].troops = 1;
+                        game->scores[troops[i].owner-1] += 30;
                     }
                 }
                 troops[i].to_t =0;
+                troops[i].owner =0;
             }
             for(int q=0;q<1000;q++){
                 if(troops[i].to_t !=0 && troops[q].owner != troops[i].owner && abs(troops[i].x - troops[q].x)<15 && abs(troops[i].y - troops[q].y)<15){
                     troops[i].x =0;
                     troops[i].y =0;
+                    troops[i].owner =0;
                     troops[i].to_t =0;
                     troops[q].x =0;
                     troops[q].y =0;
+                    troops[q].owner =0;
                     troops[q].to_t =0;
                     break;
                 }
@@ -203,7 +221,6 @@ void AI(struct map* game,struct troops_struct* troops){
 }
 
 void random_potion(struct potion_struct* potions,struct map* game,int *total){
-    printf("%d",*total);
     for(int i=0;i<3;i++){
         if(potions[i].type==0){
             int a= rand()%game->total_territory;
@@ -255,6 +272,7 @@ void render_potion(struct potion_struct* potions,struct troops_struct* troops,st
                     }else if (potions[i].type == 4) {
                         game->active_poition_time[troops[j].owner - 1] = 400;
                     }
+                    game->scores[troops[i].owner-1] += 10;
                     potions[i].type = 0;
                     potions[i].x = 0;
                     potions[i].y = 0;
@@ -315,5 +333,176 @@ void set_up_game(int is_elf,int is_orc,int is_undead,struct map* game){
                 }
             }
         }
+    }
+}
+int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* renderer,TTF_Font* font,int is_elf,int is_orc,int is_undead){
+    int t[5];
+    int ret=0;
+    memset(t,0, sizeof(t));
+    int troops;
+    for(int i=0;i<game->total_territory;i++){
+        t[game->first_tr_ptr[i].owner]++;
+    }
+    if(t[1]==0){
+        troops=0;
+        for(int k=0;k<1000;k++){
+            if(troops_list[k].owner ==1){
+                troops=1;
+                break;
+            }
+        }
+        if(troops ==0){
+            int i=4;
+            if(t[2]>=t[3]&&t[2]>=t[4]){
+                i=2;
+            }else if(t[3]>=t[4]&&t[3]>=t[2]){
+                i=3;
+            }
+            game->scores[i] += (is_elf+is_orc+is_undead)*100;
+            ret= 1;
+        }
+    }else if( t[2]==0 && t[3]==0 && t[4]==0 ){
+        troops=0;
+        for(int k=0;k<1000;k++){
+            if(troops_list[k].owner ==2 ||troops_list[k].owner==3 || troops_list[k].owner==4 ){
+                troops=1;
+                break;
+            }
+        }
+        if(troops ==0){
+            game->scores[0] += (is_elf+is_orc+is_undead)*100;
+            ret =2;
+        }
+    }
+    if(ret !=0){
+        SDL_RenderClear(renderer);
+        SDL_Color yellow = {204,204,0};
+        SDL_Rect rect[5] ;
+        rect[0].x = 490;
+        rect[0].y = 10;
+        rect[0].h= 40;
+        rect[0].w = 300;
+        rect[1].x = 800;
+        rect[1].y = 80;
+        rect[1].h= 50;
+        rect[1].w = 300;
+        rect[2].x = 800;
+        rect[2].y = 150;
+        rect[2].h= 50;
+        rect[2].w = 300;
+        rect[3].x = 800;
+        rect[3].y = 220;
+        rect[3].h= 50;
+        rect[3].w = 300;
+        rect[4].x = 800;
+        rect[4].y = 290;
+        rect[4].h= 50;
+        rect[4].w = 300;
+        SDL_Texture *b= loadTexture(renderer,"images/scoreboard_background.jpg");
+        SDL_RenderCopy(renderer,b,NULL,NULL);
+        SDL_DestroyTexture(b);
+        if(ret==2){
+            b= textLoader("Victory",yellow,font,renderer);
+            SDL_RenderCopy(renderer,b,NULL,&rect[0]);
+            SDL_DestroyTexture(b);
+        }else{
+            b = textLoader("Defeat",yellow,font,renderer);
+            SDL_RenderCopy(renderer,b,NULL,&rect[0]);
+            SDL_DestroyTexture(b);
+        }
+        struct scoreboard_data a[4];
+        for(int h=0;h<4;h++){
+            a[h].type=h;
+            a[h].point= game->scores[h];
+        }
+        char string[4][40];
+        sprintf(string[0],"Human: %d",game->scores[0]);
+        sprintf(string[1],"Orc: %d",game->scores[1]);
+        sprintf(string[2],"Elf: %d",game->scores[2]);
+        sprintf(string[3],"Undead: %d",game->scores[3]);
+        qsort((void *)a,4,sizeof (struct scoreboard_data),compare);
+        for(int f=0;f<4;f++){
+            b = textLoader(string[a[f].type],yellow,font,renderer);
+            SDL_RenderCopy(renderer,b,NULL,&rect[1+f]);
+            SDL_DestroyTexture(b);
+        }
+        SDL_RenderPresent(renderer);
+        SDL_Delay(10000);
+        return 0;
+
+    }
+
+    return 1;
+}
+int ingame_menu_button(int x, int y){
+    if(x <1100 && x>800){
+        if(y<130 && y>80){
+            return 1;
+        }if(y<200 && y>150){
+            return 2;
+        }if(y<270 && y>220){
+            return 3;
+        }
+        if(y<340 && y>290){
+            return 4;
+        }
+    }
+    return -1;
+}
+void in_game_menu(SDL_Renderer * renderer,struct map* game,int * x,struct troops_struct* troops,struct potion_struct*po,int total_p){
+    SDL_Texture* background = loadTexture(renderer,"images/menu_background.bmp");
+    SDL_Texture* button[4];
+    button[0] = loadTexture(renderer,"images/resume.jpg");
+    button[1] = loadTexture(renderer,"images/save_game.jpg");
+    button[2] = loadTexture(renderer,"images/save_map.jpg");
+    button[3] = loadTexture(renderer,"images/quit.jpg");
+    SDL_Rect rect[4];
+    rect[0].x = 800;
+    rect[0].y = 80;
+    rect[0].h= 50;
+    rect[0].w = 300;
+    rect[1].x = 800;
+    rect[1].y = 150;
+    rect[1].h= 50;
+    rect[1].w = 300;
+    rect[2].x = 800;
+    rect[2].y = 220;
+    rect[2].h= 50;
+    rect[2].w = 300;
+    rect[3].x = 800;
+    rect[3].y = 290;
+    rect[3].h= 50;
+    rect[3].w = 300;
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer,background,NULL,NULL);
+    for(int i=0;i<4;i++){
+        SDL_RenderCopy(renderer,button[i],NULL,&rect[i]);
+    }
+    for(int i=0;i<4;i++){
+        SDL_DestroyTexture(button[i]);
+    }
+    SDL_DestroyTexture(background);
+    SDL_RenderPresent(renderer);
+    int p=-1;
+    SDL_Event events;
+    while(p==-1){
+        while (SDL_PollEvent(&events)!=0) {
+            if(events.type == SDL_MOUSEBUTTONDOWN){
+                int mouse_x,mouse_y;
+                SDL_GetMouseState( &mouse_x, &mouse_y );
+                p= ingame_menu_button(mouse_x,mouse_y);
+            }
+        }
+    }
+    if(p==4){
+        *x =0;
+        return;
+    }else if(p==3){
+        save_map();
+        return;
+    } else if(p==2){
+        save_game(game,troops,po,total_p);
+    } else{
+        return;
     }
 }

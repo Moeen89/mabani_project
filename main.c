@@ -33,7 +33,7 @@ int main() {
     SDL_Color purple = {75,0,130};
     //load saved file
     FILE* save_fptr = fopen("map_and_save/save.txt","r");
-    int is_saved_game = fgetc(save_fptr) -48;
+    int is_saved_game = fgetc(save_fptr) -48 > 0;
     fclose(save_fptr);
 
     // loading background and music and textures
@@ -132,7 +132,8 @@ int main() {
                     text_texture[4] = textLoader(text,purple,game_font,renderer);
                 }else if(next_menu == 2){
                     if(is_saved_game){//load game
-
+                        game_start(renderer,0,0,0,0,game_font,1);
+                        next_menu=0;
                     }
                     else{
                         next_menu=0;
@@ -165,14 +166,16 @@ int main() {
                         next_menu =0;
                         break;
                     case 1:
-                        if(map_checked==0 || is_elf+is_undead+is_orc == player_in_map(map_checked)){
-                            game_start(renderer,map_checked,is_elf,is_orc,is_undead,game_font);
+                        if(map_checked==0 || is_elf+is_undead+is_orc+1 == player_in_map(map_checked)){
+                            game_start(renderer,map_checked,is_elf,is_orc,is_undead,game_font,0);
+
                         }
                         break;
                     case 5:
                     case 6:
                     case 7:
                     case 8:
+                    case 9:
                         map_checked = button_pushed - 5;
                         break;
                     case 10:
@@ -193,7 +196,7 @@ int main() {
         }
         SDL_RenderClear( renderer );
 
-        if(!is_name_enter){// entering name menu
+        if(!is_name_enter){// enter name menu
             SDL_RenderCopy(renderer,menu_background[0],NULL,NULL);
             SDL_RenderCopy(renderer,text_texture[0],NULL,&rect[0]);
         }else if(next_menu ==0){// main menu

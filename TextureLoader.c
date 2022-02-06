@@ -43,7 +43,7 @@ SDL_Texture* textLoader(char string[],SDL_Color text_color, TTF_Font *font,SDL_R
 }
 SDL_Texture** barracks_loader(SDL_Renderer* renderer){
     SDL_Texture** ret_val =(SDL_Texture**) malloc(sizeof(SDL_Texture*)*5);
-    ret_val[0]= loadTexture(renderer,"images/barracks/human_b.png");
+    ret_val[0]= loadTexture(renderer,"images/barracks/neutral_b.png");
     ret_val[1]= loadTexture(renderer,"images/barracks/human_b.png");
     ret_val[2]= loadTexture(renderer,"images/barracks/orc_b.png");
     ret_val[3]= loadTexture(renderer,"images/barracks/elf_b.png");
