@@ -53,7 +53,7 @@ int custom_game_button(int x,int y){
 
 
 
-void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Texture** shape_t,SDL_Texture** barracks_t,TTF_Font* game_font){
+void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Texture** shape_t,SDL_Texture** barracks_t,TTF_Font* game_font,struct map* game){
     SDL_Rect rect;
     rect.x = inp->x_center-55;
     rect.y = inp->y_center-55;
@@ -77,6 +77,14 @@ void render_territory(SDL_Renderer* renderer,struct territory_struct* inp,SDL_Te
     rect.h = 30;
     SDL_RenderCopy(renderer,text,NULL,&rect);
     SDL_DestroyTexture(text);
+    sprintf(troops,"%d",game->active_poition_time[0]/50);
+    text = textLoader(troops,green,game_font,renderer);
+    rect.x =0;
+    rect.y =0;
+    rect.w = 40;
+    rect.h = 30;
+    SDL_RenderCopy(renderer,text,NULL,&rect);
+    SDL_DestroyTexture(text);
 
 }
 
@@ -87,7 +95,7 @@ void troop_production(struct territory_struct* inp,struct map* game,int frame){
     }
     if(inp->troops<max || game->active_poition_type[inp->owner-1]==4){
         inp->troops += game->production_rate[inp->owner]*(inp->owner!=0 || frame>49);
-        if(inp->troops>max){
+        if(inp->troops>max && game->active_poition_type[inp->owner-1]!=4){
             inp->troops=max;
         }
     }
@@ -117,7 +125,7 @@ void set_troops(struct territory_struct* inp,struct troops_struct* troops,int fr
         i++;
     }
 }
-void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int frame){
+void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int frame,Mix_Chunk** sound_effect){
     SDL_Texture* t_t[4];
     t_t[0]=loadTexture(renderer,"images/t_human.png");
     t_t[1]=loadTexture(renderer,"images/t_orc.png");
@@ -133,7 +141,7 @@ void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* r
             troops[i].y=game->first_tr_ptr[troops[i].from_t-1].y_center-10;
             game->first_tr_ptr[troops[i].from_t-1].waiting_troops--;
             troops[i].from_t = 0;
-        } else if (frame%10 == 0&&game->first_tr_ptr[troops[i].from_t-1].waiting_troops>5&& troops[i].from_t !=0 &&ter[troops[i].from_t-1]==1){
+        } else if (frame%10 == 0 && troops[i].from_t !=0 && game->first_tr_ptr[troops[i].from_t-1].waiting_troops>5 && ter[troops[i].from_t-1]==1){
             ter[troops[i].from_t-1]++;
             troops[i].x=game->first_tr_ptr[troops[i].from_t-1].x_center+10;
             troops[i].y=game->first_tr_ptr[troops[i].from_t-1].y_center+10;
@@ -172,6 +180,7 @@ void render_troops(struct troops_struct* troops,struct map* game,SDL_Renderer* r
                         game->first_tr_ptr[troops[i].to_t-1].owner = troops[i].owner;
                         game->first_tr_ptr[troops[i].to_t-1].troops = 1;
                         game->scores[troops[i].owner-1] += 30;
+                        Mix_PlayChannel( -1, sound_effect[1], 0 );
                     }
                 }
                 troops[i].to_t =0;
@@ -205,7 +214,13 @@ void AI(struct map* game,struct troops_struct* troops){
         int i_max = 0;
         if(game->first_tr_ptr[i].owner >= 2){
             for(int j=0;j<game->total_territory;j++){
-                point= game->first_tr_ptr[i].troops - game->first_tr_ptr[j].troops - (game->first_tr_ptr[j].waiting_troops)/2 - sqrt(pow(game->first_tr_ptr[i].x_center -game->first_tr_ptr[j].x_center,2)+pow(game->first_tr_ptr[i].y_center -game->first_tr_ptr[j].y_center,2))/100+ 2*(game->first_tr_ptr[j].owner <2)+(game->first_tr_ptr[j].owner != game->first_tr_ptr[i].owner)+2*(game->first_tr_ptr[j].owner ==0);
+                if(game->first_tr_ptr[i].owner ==4){
+                    point = game->first_tr_ptr[i].troops - game->first_tr_ptr[j].troops - (game->first_tr_ptr[j].waiting_troops) * sqrt(pow(game->first_tr_ptr[i].x_center -game->first_tr_ptr[j].x_center,2)+pow(game->first_tr_ptr[i].y_center -game->first_tr_ptr[j].y_center,2))/100 + 2*(game->first_tr_ptr[j].owner <2)+(game->first_tr_ptr[j].owner != game->first_tr_ptr[i].owner) + (game->first_tr_ptr[i].troops>=20 ||game->first_tr_ptr[i].troops+game->first_tr_ptr[i].waiting_troops>30 )*(game->first_tr_ptr[i].owner != game->first_tr_ptr[j].owner)*10-10*(game->first_tr_ptr[i].troops <= 4+game->first_tr_ptr[j].troops);
+                }else if(game->first_tr_ptr[i].owner ==2){
+                    point =(game->first_tr_ptr[i].owner != game->first_tr_ptr[j].owner )* (game->first_tr_ptr[i].troops - game->first_tr_ptr[j].troops - game->first_tr_ptr[j].waiting_troops/3 )*((game->first_tr_ptr[i].troops - sqrt(pow(game->first_tr_ptr[i].x_center -game->first_tr_ptr[j].x_center,2)+pow(game->first_tr_ptr[i].y_center -game->first_tr_ptr[j].y_center,2))/100 > game->first_tr_ptr[j].troops)+1) + (game->first_tr_ptr[i].troops < 20)*(i==j)*5  + (game->first_tr_ptr[i].owner == game->first_tr_ptr[j].owner)*(game->first_tr_ptr[i].troops - game->first_tr_ptr[j].troops)/2 + (game->first_tr_ptr[i].troops>=25||game->first_tr_ptr[i].troops+game->first_tr_ptr[i].waiting_troops>30)*(game->first_tr_ptr[i].owner != game->first_tr_ptr[j].owner )*100;
+                }else if(game->first_tr_ptr[i].owner ==3){
+                    point = game->first_tr_ptr[i].troops - game->first_tr_ptr[j].troops - (game->first_tr_ptr[j].waiting_troops) * sqrt(pow(game->first_tr_ptr[i].x_center -game->first_tr_ptr[j].x_center,2)+pow(game->first_tr_ptr[i].y_center -game->first_tr_ptr[j].y_center,2))/100 + 2*(game->first_tr_ptr[j].owner <2)+(game->first_tr_ptr[j].owner != game->first_tr_ptr[i].owner) + (game->first_tr_ptr[i].troops>=20 ||game->first_tr_ptr[i].troops+game->first_tr_ptr[i].waiting_troops>30 )*(game->first_tr_ptr[i].owner != game->first_tr_ptr[j].owner)*10;
+                }
                 if(point>max_point){
                     max_point = point;
                     i_max=j;
@@ -238,7 +253,7 @@ void random_potion(struct potion_struct* potions,struct map* game,int *total){
     }
 }
 
-void render_potion(struct potion_struct* potions,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int* total) {
+void render_potion(struct potion_struct* potions,struct troops_struct* troops,struct map* game,SDL_Renderer* renderer,int* total,Mix_Chunk** sound_effect) {
     SDL_Texture *t[4];
     t[0] = loadTexture(renderer, "images/potion1.png");
     t[1] = loadTexture(renderer, "images/potion2.png");
@@ -253,8 +268,8 @@ void render_potion(struct potion_struct* potions,struct troops_struct* troops,st
             r.h = 60;
             SDL_RenderCopy(renderer, t[potions[i].type - 1], NULL, &r);
             for (int j = 0; j < 1000; j++) {
-                if (troops[j].owner !=0 && game->active_poition_time[troops[j].owner - 1] == 0 && abs(potions[i].x - troops[j].x) < 35 &&
-                    abs(potions[i].y - troops[j].y) < 25) {
+                if (troops[j].owner !=0 && game->active_poition_time[troops[j].owner - 1] == 0 && abs(potions[i].x - troops[j].x) < 40 &&
+                    abs(potions[i].y - troops[j].y) < 40) {
                     game->active_poition_type[troops[j].owner - 1] = potions[i].type;
                     if (potions[i].type == 1) {
                         game->troops_speed[troops[j].owner - 1] = 4;
@@ -272,7 +287,8 @@ void render_potion(struct potion_struct* potions,struct troops_struct* troops,st
                     }else if (potions[i].type == 4) {
                         game->active_poition_time[troops[j].owner - 1] = 400;
                     }
-                    game->scores[troops[i].owner-1] += 10;
+                    game->scores[troops[j].owner-1] += 10;
+                    Mix_PlayChannel( -1, sound_effect[4], 0 );
                     potions[i].type = 0;
                     potions[i].x = 0;
                     potions[i].y = 0;
@@ -335,7 +351,7 @@ void set_up_game(int is_elf,int is_orc,int is_undead,struct map* game){
         }
     }
 }
-int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* renderer,TTF_Font* font,int is_elf,int is_orc,int is_undead){
+int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* renderer,TTF_Font* font,int is_elf,int is_orc,int is_undead,Mix_Chunk** sound_effect){
     int t[5];
     int ret=0;
     memset(t,0, sizeof(t));
@@ -352,13 +368,14 @@ int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* ren
             }
         }
         if(troops ==0){
-            int i=4;
+            int i=3;
             if(t[2]>=t[3]&&t[2]>=t[4]){
-                i=2;
+                i=1;
             }else if(t[3]>=t[4]&&t[3]>=t[2]){
-                i=3;
+                i=2;
             }
             game->scores[i] += (is_elf+is_orc+is_undead)*100;
+            game->scores[0] -= (4 - is_elf-is_orc-is_undead)*20;
             ret= 1;
         }
     }else if( t[2]==0 && t[3]==0 && t[4]==0 ){
@@ -403,10 +420,12 @@ int is_over(struct map* game,struct troops_struct* troops_list,SDL_Renderer* ren
         SDL_DestroyTexture(b);
         if(ret==2){
             b= textLoader("Victory",yellow,font,renderer);
+            Mix_PlayChannel( -1,sound_effect[2], 0 );
             SDL_RenderCopy(renderer,b,NULL,&rect[0]);
             SDL_DestroyTexture(b);
         }else{
             b = textLoader("Defeat",yellow,font,renderer);
+            Mix_PlayChannel( -1,sound_effect[3], 0 );
             SDL_RenderCopy(renderer,b,NULL,&rect[0]);
             SDL_DestroyTexture(b);
         }
@@ -449,7 +468,7 @@ int ingame_menu_button(int x, int y){
     }
     return -1;
 }
-void in_game_menu(SDL_Renderer * renderer,struct map* game,int * x,struct troops_struct* troops,struct potion_struct*po,int total_p){
+void in_game_menu(SDL_Renderer * renderer,struct map* game,int * x,struct troops_struct* troops,struct potion_struct*po,int total_p,char name[40]){
     SDL_Texture* background = loadTexture(renderer,"images/menu_background.bmp");
     SDL_Texture* button[4];
     button[0] = loadTexture(renderer,"images/resume.jpg");
@@ -501,8 +520,12 @@ void in_game_menu(SDL_Renderer * renderer,struct map* game,int * x,struct troops
         save_map();
         return;
     } else if(p==2){
-        save_game(game,troops,po,total_p);
+        save_game(game,troops,po,total_p,name);
     } else{
         return;
     }
+}
+
+void destroy_main (){
+
 }

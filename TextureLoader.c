@@ -90,3 +90,12 @@ SDL_Texture** shape_loader(SDL_Renderer* renderer){
     ret_val[35]= loadTexture(renderer,"images/shape/9_undead.png");
     return ret_val;
 }
+Mix_Chunk** load_sound_effect(){
+    Mix_Chunk ** ret_val =(Mix_Chunk**) malloc(sizeof(Mix_Chunk*)*5);
+    ret_val[0] = Mix_LoadWAV( "sounds/start_game.wav" );
+    ret_val[1] = Mix_LoadWAV( "sounds/t_captured.wav" );
+    ret_val[2] = Mix_LoadWAV( "sounds/win.wav" );
+    ret_val[3] = Mix_LoadWAV( "sounds/loose.wav" );
+    ret_val[4] = Mix_LoadWAV( "sounds/potion.wav" );
+    return ret_val;
+}

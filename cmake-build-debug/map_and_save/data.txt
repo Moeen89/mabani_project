@@ -1,0 +1,10 @@
+j 2470
+u 1090
+h 360
+Love 350
+k 250
+* 210
+LovBNSfg 160
+lkj 30
+lon 30
+lin 30

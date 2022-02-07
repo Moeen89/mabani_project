@@ -1,14 +1,28 @@
 //
 // Created by moein111 on 31.01.22.
 //
-
+#include <string.h>
+struct user{
+    char username[40];
+    int score
+};
 #include "file_functions.h"
-int scores(int player){
-    return 1000;
+int scores(SDL_Texture* t[4],SDL_Renderer* renderer,TTF_Font* font,SDL_Color *y){
+    FILE* f_ptr = fopen("map_and_save/data.txt","r");
+    char text[50];
+    struct user list[4];
+    for(int i=0;i<4;i++){
+        fscanf(f_ptr,"%s %d\n",&list[i].username,&list[i].score);
+    }
+    for(int i=0;i<4;i++){
+        sprintf(text,"%s %d",list[i].username, list[i].score);
+        t[i] = textLoader(text,*y,font,renderer);
+    }
+    fclose(f_ptr);
 }
 int player_in_map(int n){
     FILE *ptr = NULL;
-    int a;
+    int a=0;
     if(n==4){
         ptr = fopen("map_and_save/maps/map_random.txt","r");
     } else if(n==1){
@@ -17,6 +31,8 @@ int player_in_map(int n){
         ptr = fopen("map_and_save/maps/map2.txt","r");
     }else if(n==3){
         ptr = fopen("map_and_save/maps/map3.txt","r");
+    }else {
+        return 0;
     }
     fscanf(ptr,"%d\n",&a);
     fclose(ptr);
@@ -58,8 +74,9 @@ struct map loading_map(int map_number){
     fclose(file_ptr);
     return game;
 }
-void save_game(struct map* game,struct troops_struct* troops_list,struct potion_struct* potion_list,int potion){
+void save_game(struct map* game,struct troops_struct* troops_list,struct potion_struct* potion_list,int potion,char name[40]){
     FILE * f_ptr = fopen("map_and_save/save.txt","w");
+    fprintf(f_ptr,"%s\n",name);
     fprintf(f_ptr,"%d\n",game->player_alive);
     fprintf(f_ptr,"%d\n",game->total_territory);
     fprintf(f_ptr,"%d %d %d %d %d\n",game->production_rate[0],game->production_rate[1],game->production_rate[2],game->production_rate[3],game->production_rate[4]);
@@ -81,6 +98,8 @@ void save_game(struct map* game,struct troops_struct* troops_list,struct potion_
 }
 void load_saved_game(struct map* game,struct troops_struct* troops_list,struct potion_struct* potion_list,int* potion){
     FILE * f_ptr = fopen("map_and_save/save.txt","r");
+    char tmp[40];
+    fscanf(f_ptr,"%s\n",tmp);
     fscanf(f_ptr,"%d\n",&game->player_alive);
     fscanf(f_ptr,"%d\n",&game->total_territory);
     fscanf(f_ptr,"%d %d %d %d %d\n",&game->production_rate[0],&game->production_rate[1],&game->production_rate[2],&game->production_rate[3],&game->production_rate[4]);
@@ -88,6 +107,8 @@ void load_saved_game(struct map* game,struct troops_struct* troops_list,struct p
     fscanf(f_ptr,"%d %d %d %d\n",&game->active_poition_type[0],&game->active_poition_type[1],&game->active_poition_type[2],&game->active_poition_type[3]);
     fscanf(f_ptr,"%d %d %d %d\n",&game->active_poition_time[0],&game->active_poition_time[1],&game->active_poition_time[2],&game->active_poition_time[3]);
     fscanf(f_ptr,"%d %d %d %d\n",&game->scores[0],&game->scores[1],&game->scores[2],&game->scores[3]);
+    printf("%d",game->total_territory);
+    fflush(stdout);
     game->first_tr_ptr = (struct territory_struct*) malloc(sizeof (struct territory_struct)*game->total_territory);
     for(int i=0;i< game->total_territory;i++){
         fscanf(f_ptr,"%d %d %d %d %d %d %d\n",&game->first_tr_ptr[i].x_center,&game->first_tr_ptr[i].y_center,&game->first_tr_ptr[i].type,&game->first_tr_ptr[i].rotation,&game->first_tr_ptr[i].owner,&game->first_tr_ptr[i].troops,&game->first_tr_ptr[i].waiting_troops);
@@ -103,7 +124,51 @@ void load_saved_game(struct map* game,struct troops_struct* troops_list,struct p
     fclose(f_ptr);
 
 }
+int compare_score(const struct user* p,const struct user*q){
+    if(q->score > p->score){
+        return 1;
+    }
+    return 0;
+}
+void update_score(char name[40],int score){
+    FILE* f_ptr = fopen("map_and_save/data.txt","r");
+    struct user list[10];
+    memset(list,0,sizeof(list));
+    for(int i=0;i<10;i++){
+        fscanf(f_ptr,"%s %d\n",&list[i].username,&list[i].score);
+    }
+    int f=0;
+    for(int i=0;i<10;i++){
+        if(strcmp(name,list[i].username)==0){
+            list[i].score +=score;
+            f=1;
+            break;
+        }
+    }
+    if(f==0){
+        for(int i=0;i<10;i++){
+            if(strcmp("NULL",list[i].username)==0){
+                list[i].score =score;
+                for(int j=0;j<40;j++){
+                    list[i].username[j]=name[j];
+                }
+                f=2;
+                break;
+            }
+        }
+        if(f==0){
+            list[9].score =score;
+            for(int j=0;j<40;j++){
+                list[9].username[j]=name[j];
+            }
+        }
+    }
+    qsort(list,10,sizeof(struct user),compare_score);
+    fclose(f_ptr);
+    f_ptr = fopen("map_and_save/data.txt","w");
+    for(int i=0;i<10;i++){
+        fprintf(f_ptr,"%s %d\n",list[i].username,list[i].score);
+    }
+    fclose(f_ptr);
 
-void update_score(){
-    FILE* f_ptr = fopen("map_and_save/data.txt","w");
 }

@@ -50,5 +50,5 @@ struct potion_struct{
     int type;
 };
 
-int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int is_undead,TTF_Font* game_font,int is_loaded );
+int game_start(SDL_Renderer* renderer,int map_checked,int is_elf,int is_orc,int is_undead,TTF_Font* game_font ,int is_loaded,char name[40],int t_for_random);
 #endif //U_GAME_H

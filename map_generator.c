@@ -12,15 +12,16 @@ int territory_conflict(int x,int y,int placed_territory,struct territory_struct 
     }
     return 0;
 }
-struct map random_map(int player){
-    srand(time(0));
+struct map random_map(int player,int total_t){
+    srand(time(NULL));
+
     struct map random_map;
     memset(&random_map,0, sizeof(struct map));
-    random_map.total_territory = player*3 + (2*rand())%player;
+    random_map.total_territory = total_t;
     random_map.first_tr_ptr = (struct territory_struct*) malloc(sizeof (struct territory_struct)*random_map.total_territory);
     memset(random_map.first_tr_ptr,0,sizeof (struct territory_struct)*random_map.total_territory);
     random_map.player_alive = player;
-    int placed_territory=0,is_conflict,random_x,random_y,is_two_territory_for_one,each_player_t=0;
+    int placed_territory=0,is_conflict,random_x,random_y,each_player_t=0;
     for(int j=0;j<player;j++){
         random_map.players_t[j] = 1+ rand()%2;
         each_player_t =0;
@@ -62,7 +63,6 @@ struct map random_map(int player){
     random_map.troops_speed[1] = 2;
     random_map.troops_speed[2] = 2;
     random_map.troops_speed[3] = 2;
-
     FILE* file_ptr = fopen("map_and_save/maps/generated map.txt","w");
     fprintf(file_ptr,"%d\n",random_map.player_alive);
     fprintf(file_ptr,"%d\n",random_map.total_territory);
@@ -70,7 +70,6 @@ struct map random_map(int player){
         fprintf(file_ptr,"%d %d %d %d %d %d %d\n",random_map.first_tr_ptr[i].x_center,random_map.first_tr_ptr[i].y_center,random_map.first_tr_ptr[i].type,random_map.first_tr_ptr[i].rotation,random_map.first_tr_ptr[i].owner,random_map.first_tr_ptr[i].troops,random_map.first_tr_ptr[i].waiting_troops);
     }
     fclose(file_ptr);
-
     return random_map;
 
 }

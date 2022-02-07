@@ -11,4 +11,5 @@ SDL_Texture* loadTexture(SDL_Renderer* renderer,char path[]);
 SDL_Texture* textLoader(char string[],SDL_Color text_color, TTF_Font *font,SDL_Renderer* renderer);
 SDL_Texture** barracks_loader(SDL_Renderer* renderer);
 SDL_Texture** shape_loader(SDL_Renderer* renderer);
+Mix_Chunk** load_sound_effect();
 #endif //U_TEXTURELOADER_H
